@@ -1,27 +1,4 @@
 
-// import './App.css'
-// import Login from './Pages/Login'
-// import Registration from './Pages/Registration'
-
-// function App() {
-
-
-//   return (
-//     <>
-//       <div>
-//         <h1>BookStoreManagement</h1>
-//         <Login/>
-//         <Registration/>
-        
-//       </div>
-//     </>
-//   )
-// }
-
-// export default App
-
-
-
 import {
   BrowserRouter,
   Routes,
@@ -29,9 +6,9 @@ import {
   Navigate
 } from "react-router-dom";
 
- import Login from './Pages/Login'
+import Login from "./Pages/Login";
 import Register from "./Pages/Registration";
- 
+import AdminDashboard from "./Pages/AdminDashboard";
 
 function App() {
   return (
@@ -53,10 +30,15 @@ function App() {
           element={<Register />}
         />
 
+        {/* Admin Dashboard */}
+        <Route
+          path="/admin-dashboard"
+          element={<AdminDashboard />}
+        />
+
       </Routes>
     </BrowserRouter>
   );
 }
 
 export default App;
-

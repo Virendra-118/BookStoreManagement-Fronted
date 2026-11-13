@@ -21,6 +21,18 @@ export interface RegisterRequest {
   password: string;
 }
 
+export interface LoginResponse {
+  message: string;
+  token: string;
+  expiresAt: string;
+  user: {
+    id: string;
+    fullName: string;
+    email: string;
+    role: "Admin" | "Customer";
+  };
+}
+
 // Authentication state
 export interface Authstate {
   user: AuthUser | null;

@@ -8,12 +8,11 @@ import {
   Input,
   Label,
   MessageBar,
-  MessageBarBody
+  MessageBarBody,
 } from "@fluentui/react-components";
 
 import { useFormik } from "formik";
 import { loginUser } from "../Services/authService";
-
 import "../Styles/Login.css";
 
 interface LoginFormValues {
@@ -23,26 +22,21 @@ interface LoginFormValues {
 
 function Login() {
   const [message, setMessage] = useState("");
-  const [messageType, setMessageType] =
-    useState<"success" | "error">("error");
-
+  const [messageType, setMessageType] = useState<"success" | "error">("error");
   const [showPassword, setShowPassword] = useState(false);
 
   const formik = useFormik<LoginFormValues>({
     initialValues: {
       email: "",
-      password: ""
+      password: "",
     },
 
-    // Form validation
     validate: (values) => {
       const errors: Partial<LoginFormValues> = {};
 
-      if (!values.email.trim()) {
+      if (!values.email) {
         errors.email = "Email is required";
-      } else if (
-        !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email)
-      ) {
+      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email)) {
         errors.email = "Enter a valid email address";
       }
 
@@ -53,47 +47,48 @@ function Login() {
       return errors;
     },
 
-    // Login API integration
     onSubmit: async (values) => {
       setMessage("");
 
       try {
         const response = await loginUser({
           email: values.email,
-          password: values.password
+          password: values.password,
         });
 
-        console.log("Login API Response:", response);
+        // Store JWT token
+        localStorage.setItem("token", response.token);
 
-        setMessage(
-          response.message || "Login successful!"
-        );
+        // Store user information
+        localStorage.setItem("user", JSON.stringify(response.user));
 
+        // Store token expiry date
+        localStorage.setItem("expiresAt", response.expiresAt);
+
+        setMessage(response.message);
         setMessageType("success");
 
+        console.log("Login Response:", response);
+        console.log("User Role:", response.user.role);
+
       } catch (error: unknown) {
-        console.error("Login API Error:", error);
-
-        let errorMessage =
-          "Login failed. Please check your credentials.";
-
         if (axios.isAxiosError(error)) {
-          errorMessage =
-            error.response?.data?.message || errorMessage;
+          setMessage(
+            error.response?.data?.message ||
+              "Login failed. Please try again."
+          );
+        } else {
+          setMessage("Something went wrong. Please try again.");
         }
 
-        setMessage(errorMessage);
         setMessageType("error");
       }
-    }
+    },
   });
 
   return (
     <div className="login-page">
-
-      {/* Left Branding Section */}
       <div className="login-brand">
-
         <h1>
           Book<span>Store</span>
           <br />
@@ -107,143 +102,102 @@ function Login() {
           <br />
           orders in one place.
         </p>
-
       </div>
 
-      {/* Right Login Section */}
       <div className="login-form-section">
-
         <div className="login-card">
-
           <h2>Welcome Back!</h2>
+          <p>Login to your account</p>
 
-          <p className="login-subtitle">
-            Sign in to your BookStore Management account
-          </p>
-
-          {/* API Success / Error Message */}
           {message && (
             <MessageBar intent={messageType}>
-              <MessageBarBody>
-                {message}
-              </MessageBarBody>
+              <MessageBarBody>{message}</MessageBarBody>
             </MessageBar>
           )}
 
-          <form
-            className="login-form"
-            onSubmit={formik.handleSubmit}
-          >
-
+          <form onSubmit={formik.handleSubmit} className="login-form">
             {/* Email Field */}
             <div className="form-group">
+              <Label htmlFor="email">Email Address</Label>
 
-              <Label required>Email Address</Label>
-
-              <div className="login-input-wrapper email-input">
-
-                <Input
-                  name="email"
-                  type="email"
-                  placeholder="Enter your email"
-                  value={formik.values.email}
-                  onChange={(_, data) =>
-                    formik.setFieldValue("email", data.value)
-                  }
-                  onBlur={formik.handleBlur}
-                />
-
-              </div>
+              <Input
+                id="email"
+                type="email"
+                placeholder="Enter your email"
+                value={formik.values.email}
+                onChange={(_, data) =>
+                  formik.setFieldValue("email", data.value)
+                }
+                onBlur={formik.handleBlur}
+                aria-invalid={Boolean(
+                  formik.touched.email && formik.errors.email
+                )}
+              />
 
               {formik.touched.email && formik.errors.email && (
-                <span className="error-text">
+                <span className="error-message">
                   {formik.errors.email}
                 </span>
               )}
-
             </div>
 
             {/* Password Field */}
             <div className="form-group">
+              <Label htmlFor="password">Password</Label>
 
-              <Label required>Password</Label>
-
-              <div className="login-input-wrapper password-input">
-
-                <Input
-                  name="password"
-                  type={showPassword ? "text" : "password"}
-                  placeholder="Enter your password"
-                  value={formik.values.password}
-                  onChange={(_, data) =>
-                    formik.setFieldValue("password", data.value)
-                  }
-                  onBlur={formik.handleBlur}
-                />
-
-                {/* Show / Hide Password */}
-                <button
-                  type="button"
-                  className="password-toggle"
-                  onClick={() =>
-                    setShowPassword(!showPassword)
-                  }
-                  aria-label={
-                    showPassword ? "Hide password" : "Show password"
-                  }
-                >
-                  {showPassword ? "Hide" : "Show"}
-                </button>
-
-              </div>
+              <Input
+                id="password"
+                type={showPassword ? "text" : "password"}
+                placeholder="Enter your password"
+                value={formik.values.password}
+                onChange={(_, data) =>
+                  formik.setFieldValue("password", data.value)
+                }
+                onBlur={formik.handleBlur}
+                aria-invalid={Boolean(
+                  formik.touched.password && formik.errors.password
+                )}
+                contentAfter={
+                  <Button
+                    type="button"
+                    appearance="subtle"
+                    size="small"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? "Hide" : "Show"}
+                  </Button>
+                }
+              />
 
               {formik.touched.password && formik.errors.password && (
-                <span className="error-text">
+                <span className="error-message">
                   {formik.errors.password}
                 </span>
               )}
-
             </div>
 
             {/* Forgot Password */}
-            <div className="login-options">
-
-              <Link
-                to="/forgot-password"
-                className="forgot-password"
-              >
-                Forgot Password?
-              </Link>
-
+            <div className="forgot-password">
+              <Link to="/forgot-password">Forgot Password?</Link>
             </div>
 
             {/* Login Button */}
             <Button
-              appearance="primary"
               type="submit"
+              appearance="primary"
               className="login-button"
               disabled={formik.isSubmitting}
             >
-              {formik.isSubmitting
-                ? "Logging in..."
-                : "Login"}
+              {formik.isSubmitting ? "Logging in..." : "Login"}
             </Button>
-
           </form>
 
-          {/* Registration Navigation */}
-          <p className="register-link">
-            Don't have an account?{" "}
-
-            <Link to="/register">
-              Create Account
-            </Link>
-          </p>
-
+          {/* Register Link */}
+          <div className="register-link">
+            Don't have an account? <Link to="/register">Register</Link>
+          </div>
         </div>
-
       </div>
-
     </div>
   );
 }
