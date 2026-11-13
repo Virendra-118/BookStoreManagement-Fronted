@@ -481,6 +481,34 @@
   color: #c58a27;
 }
 
+
+.dashboard-loading,
+.dashboard-error {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.revenue-no-data {
+  min-height: 180px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  color: #8490a3;
+  text-align: center;
+  padding: 20px;
+}
+
+.revenue-no-data svg {
+  font-size: 35px;
+}
+
+
 /* Responsive */
 @media (max-width: 1100px) {
   .admin-sidebar {
